@@ -9,27 +9,18 @@
               :key="skelet"
               v-show="!imgLoading.boolean"
             ></Skeleton>
-            <article class="hentry" v-for="post in posts" :key="post.id">
-              <header class="entry-header" v-show="!apiLoading && imgLoading.boolean">
-                <div class="entry-thumbnail">
-                  <a @click="$router.push(`/post/${post.id}`)"
-                    ><img
-                      class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
-                      alt="изображение"
-                      :src="post.image"
-                      @load="onImgLoad(1)"
-                      @error="onImgLoad(-1)"
-                  /></a>
-                </div>
-                <h2 class="entry-title">
-                  <a @click="$router.push(`/post/${post.id}`)" rel="bookmark">{{ post.title }}</a>
-                </h2>
-                <p class="portfoliotype">{{ post.preview }}</p>
-              </header>
-            </article>
+
+            <post-item
+              class="hentry"
+              v-for="post in posts"
+              :post="post"
+              :key="post.id"
+              v-show="!apiLoading && imgLoading.boolean"
+              @onImgLoad="onImgLoad"
+            ></post-item>
           </div>
 
-          <nav class="pagination">
+          <nav class="pagination" ref="myScrollTarget">
             <a
               class="page-numbers"
               :class="{ current: page === pageNumber }"
@@ -39,6 +30,7 @@
               >{{ pageNumber }}
             </a>
           </nav>
+
           <br />
         </main>
         <Error-message v-else>Произошла непредвиденная ошибка при загрузке постов</Error-message>
@@ -49,6 +41,7 @@
 
 <script lang="ts">
 import ErrorMessage from '@/components/UI/ErrorMessage.vue';
+import PostItem from '@/components/PostItem.vue';
 import Skeleton from '@/components/UI/Skeleton.vue';
 import { fetchPosts, fetchTotalPages } from '@/api/postApi';
 import { TPost } from '@/types/types';
@@ -57,6 +50,7 @@ import { defineComponent } from 'vue';
 export default defineComponent({
   name: 'MainPage',
   components: {
+    PostItem,
     ErrorMessage,
     Skeleton,
   },
@@ -74,9 +68,17 @@ export default defineComponent({
         imgCount: [] as number[],
         boolean: false,
       },
+      firstMount: true,
     };
   },
   methods: {
+    scrollToElement() {
+      const el = this.$refs.myScrollTarget as HTMLElement;
+      console.log(el);
+      if (el) {
+        el.scrollIntoView();
+      }
+    },
     changePage(pageNumber: number) {
       this.page = pageNumber;
     },
@@ -84,11 +86,15 @@ export default defineComponent({
       this.imgLoading.imgCount.push(value);
       if (this.imgLoading.imgCount.length === 6) {
         this.imgLoading.boolean = true;
+        !this.firstMount ? this.scrollToElement() : null;
+        this.firstMount = false;
       } else if (
         this.page === this.totalPages &&
         this.imgLoading.imgCount.length === Math.floor(this.postsValue / this.totalPages)
       ) {
         this.imgLoading.boolean = true;
+        !this.firstMount ? this.scrollToElement() : null;
+        this.firstMount = false;
       }
     },
     fetchData() {
@@ -124,7 +130,9 @@ export default defineComponent({
           }
         })
         .catch((e) => (this.apiError = true))
-        .finally(() => (this.apiLoading = false));
+        .finally(() => {
+          this.apiLoading = false;
+        });
     },
   },
 });
@@ -150,9 +158,5 @@ export default defineComponent({
   flex-wrap: wrap;
   justify-content: center;
   row-gap: 2px;
-}
-
-a {
-  cursor: pointer;
 }
 </style>
