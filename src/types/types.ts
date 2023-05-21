@@ -3,11 +3,6 @@ export type TPost = {
   title: string;
   preview: string;
   image: string;
-  rdyImage: HTMLImageElement;
-};
-
-type Timage = {
-  src: string;
 };
 
 export type TPostById = {

@@ -80,12 +80,8 @@ export default defineComponent({
     changePage(pageNumber: number) {
       this.page = pageNumber;
     },
-    nextPage() {
-      this.page++;
-    },
     onImgLoad(value: number) {
       this.imgLoading.imgCount.push(value);
-      console.log(this.imgLoading.imgCount.length);
       if (this.imgLoading.imgCount.length === 6) {
         this.imgLoading.boolean = true;
       } else if (
@@ -112,7 +108,7 @@ export default defineComponent({
         .finally(() => (this.apiLoading = false));
     },
   },
-  beforeMount() {
+  created() {
     this.fetchData();
   },
   watch: {
