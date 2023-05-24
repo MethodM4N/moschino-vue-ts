@@ -7,7 +7,7 @@
             min-height="13rem"
             :src="post.image"
             class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
-            alt="p1"
+            alt="изображение"
           />
         </div>
         <h1 class="entry-title">{{ post.title }}</h1>
